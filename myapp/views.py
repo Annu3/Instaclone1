@@ -9,8 +9,6 @@ from insta_clone.settings import BASE_DIR
 
 from imgurpython import ImgurClient
 
-from imgurpython import ImgurClient
-
 
 def signup_view(request):
     if request.method == "POST":
