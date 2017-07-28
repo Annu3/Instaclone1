@@ -5,14 +5,17 @@
     <title>Title</title>
 </head>
 <body>
+
+     <a href="http://127.0.0.1:8000/comment/login/"><h3>Logout</h3></a>
     <form method="post" action="/post/">
+
         {% csrf_token %}
         <input type="submit" class="btn-default btn" value="Create Post">
+
     </form>
 
 
     {% for post in posts %}
-
 
         <h3> Posted by: {{ post.user.username }} </h3>
         <p>[{{ post.created_on }}]</p>
@@ -57,30 +60,3 @@
 
 
 
-
-
-
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Title</title>
-</head>
-<body>
- <form method="post" action="/post/">
-        {% csrf_token %}
-        <input type="submit" class="btn-default btn" value="Create Post">
-    </form>
- <h1>Feeds</h1>
-  {% for post in posts %}
-  <p>posts</p>
-   <h3>
-          Posted by: {{ post.user.username }}
-   </h3>
-   <img style="height: 50px; width: 40px;" src="{{ post.image_url }}">
-   <span>
-          {{ post.caption }}
-   </span>
- {% endfor %}
-</body>
-</html>

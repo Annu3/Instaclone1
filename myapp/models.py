@@ -13,6 +13,7 @@ class UserModel(models.Model):
 	created_on = models.DateTimeField(auto_now_add=True)
 	updated_on = models.DateTimeField(auto_now=True)
 
+
 class SessionToken(models.Model):
 	user = models.ForeignKey(UserModel)
 	session_token = models.CharField(max_length=255)
