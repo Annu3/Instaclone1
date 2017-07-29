@@ -23,13 +23,13 @@ class LikeForm(forms.ModelForm):
         model = LikeModel
         fields=['post']
 
-
 class CommentForm(forms.ModelForm):
-
     class Meta:
         model = CommentModel
-        fields = ['comment_text', 'post']
+        fields = ['comment_text', 'post','id','upvote_num']
 
+class UpvoteForm(forms.Form):
+    id = forms.IntegerField()
 
 
 

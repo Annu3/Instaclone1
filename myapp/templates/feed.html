@@ -4,13 +4,15 @@
     <meta charset="UTF-8">
     <title>Title</title>
 </head>
-<body>
+<body bgcolor="#7cfc00">
+
 
      <a href="http://127.0.0.1:8000/comment/login/"><h3>Logout</h3></a>
     <form method="post" action="/post/">
 
         {% csrf_token %}
         <input type="submit" class="btn-default btn" value="Create Post">
+
 
     </form>
 
@@ -50,6 +52,15 @@
         <div>
             {% for comment in post.comments %}
                 <p><b>{{ comment.user.username }} [{{ comment.created_on }}]:</b> {{ comment.comment_text }}</p>
+                   <form method="POST" action="/upvote/">
+              {% csrf_token %}
+
+              <input type="hidden" name="id" value="{{ comment.id }}">
+
+              <input type="submit" class="btn btn-default" value="Upvote">
+
+          </form><span>Upvotes: {{comment.upvote_num}}</span>
+
             {% endfor %}
         </div>
 
