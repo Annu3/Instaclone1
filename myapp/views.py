@@ -7,6 +7,7 @@ from insta_clone.settings import BASE_DIR
 from imgurpython import ImgurClient
 from datetime import timedelta
 from django.utils import timezone
+import requests
 
 
 def signup_view(request):
@@ -92,6 +93,7 @@ def feed_view(request):
     else:
         return redirect('/login/')
 
+
 def post_view(request):
     user = check_validation(request)
 
@@ -144,6 +146,9 @@ def check_validation(request):
                 return session.user
     else:
         return None
+
+
+
 
 def logout_view(request):
 
