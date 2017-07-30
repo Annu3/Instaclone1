@@ -127,9 +127,20 @@ def comment_view(request):
         form = CommentForm(request.POST)
         if form.is_valid():
             post_id = form.cleaned_data.get('post').id
+            print post_id
             comment_text = form.cleaned_data.get('comment_text')
             comment = CommentModel.objects.create(user=user, post_id=post_id, comment_text=comment_text)
             comment.save()
+
+            apikey = '39JDDYmgIv5c1FPr54X0ozcQ6L8nnk29DejqgZ2h7aY'
+            request_url =('https://apis.paralleldots.com/sentiment?sentence1=%s&apikey=%s') % (comment_text, apikey)
+            print 'POST request url : %s' % (request_url)
+            sentiment = requests.get(request_url, verify=False).json()
+            sentiment_value = sentiment['sentiment']
+            print sentiment_value
+            if (sentiment_value < 0.6 and max(value_list) > 0.7):
+                print 'dirty image'
+
             return redirect('/feed/')
         else:
             return redirect('/feed/')
