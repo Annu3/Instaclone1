@@ -147,19 +147,15 @@ def check_validation(request):
     else:
         return None
 
-
-
-
 def logout_view(request):
 
-    user = check_validation(request)
+        user = check_validation(request)
 
-    if user is not None:
-        latest_sessn = SessionToken.objects.filter(user=user).last()
-        if latest_sessn:
-            latest_sessn.delete()
-            return redirect("/login/")
-            # how to get cookies in python to delete cookie n session
+        if user is not None:
+            latest_sessn = SessionToken.objects.filter(user=user).last()
+            if latest_sessn:
+                latest_sessn.delete()
+                return redirect("/login/")
 
 
 # method to create upvote for comments
