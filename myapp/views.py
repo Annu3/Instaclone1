@@ -1,12 +1,13 @@
 from __future__ import unicode_literals
 from django.shortcuts import render, redirect
-from forms import SignUpForm, LoginForm, PostForm, LikeForm, CommentForm, UpvoteForm
+from forms import SignUpForm, LoginForm, PostForm, LikeForm, CommentForm, UpvoteForm,  SearchForm
 from models import UserModel, SessionToken, PostModel, LikeModel, CommentModel
 from django.contrib.auth.hashers import make_password, check_password
 from insta_clone.settings import BASE_DIR
 from imgurpython import ImgurClient
-from datetime import timedelta
+from datetime import timedelta, datetime
 from django.utils import timezone
+from paralleldots import response_paralleldots
 import requests
 
 
@@ -19,12 +20,20 @@ def signup_view(request):
             email = form.cleaned_data['email']
             password = form.cleaned_data['password']
             # saving data to DB
-            user = UserModel(name=name, password=make_password(password), email=email, username=username)
-            user.save()
-            return render(request, 'success.html')
+            empty = len(username) == 0 and len(password) == 0
+            if len(username) >= 4 and len(password) >= 3:
+                user = UserModel(name=name, password=make_password(password), email=email, username=username)
+                user.save()
+                return render(request, 'success.html')
+            text = {}
+            text = "Username or password is not long enough"
             # return redirect('login/')
-    else:
+        else:
+            form = SignUpForm()
+    elif request.method == "GET":
         form = SignUpForm()
+        today = datetime.now()
+    return render(request, 'index.html', {'today': today, 'form': form})
 
     return render(request, 'index.html', {'form': form})
 
@@ -121,6 +130,14 @@ def post_view(request):
         return redirect('/login/')
 
 
+def arr_of_dict(args):
+    pass
+
+
+def send_response(comment_text):
+    pass
+
+
 def comment_view(request):
     user = check_validation(request)
     if user and request.method == 'POST':
@@ -138,16 +155,14 @@ def comment_view(request):
             sentiment = requests.get(request_url, verify=False).json()
             sentiment_value = sentiment['sentiment']
             print sentiment_value
-            if (sentiment_value < 0.6 and max(value_list) > 0.7):
-                print 'dirty image'
 
+            print 'commented'
             return redirect('/feed/')
         else:
             return redirect('/feed/')
     else:
         return redirect('/login')
 
-# For validating the session
 def check_validation(request):
     if request.COOKIES.get('session_token'):
         session = SessionToken.objects.filter(session_token=request.COOKIES.get('session_token')).first()
@@ -198,3 +213,20 @@ def upvote_view(request):
         return redirect('/feed/')
     else:
         return redirect('/feed/')
+
+def query_based_search_view(request):
+
+    user = check_validation(request)
+    if user:
+        if request.method == "POST":
+            searchForm = SearchForm(request.POST)
+            if searchForm.is_valid():
+                print 'valid'
+                username_query = searchForm.cleaned_data.get('searchquery')
+                user_with_query = UserModel.objects.filter(username=username_query).first();
+                posts = PostModel.objects.filter(user=user_with_query)
+                return render(request, 'feed.html',{'posts':posts})
+            else:
+                return redirect('/feed/')
+    else:
+        return redirect('/login/')

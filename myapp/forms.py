@@ -31,8 +31,8 @@ class CommentForm(forms.ModelForm):
 class UpvoteForm(forms.Form):
     id = forms.IntegerField()
 
-
-
+class SearchForm(forms.Form):
+    searchquery = forms.CharField();
 
 
 
