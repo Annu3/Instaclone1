@@ -1,14 +1,14 @@
 from __future__ import unicode_literals
 from django.shortcuts import render, redirect
-from forms import SignUpForm, LoginForm, PostForm, LikeForm, CommentForm, UpvoteForm,  SearchForm
+from forms import SignUpForm, LoginForm, PostForm, LikeForm, CommentForm, UpvoteForm, SearchForm
 from models import UserModel, SessionToken, PostModel, LikeModel, CommentModel
 from django.contrib.auth.hashers import make_password, check_password
 from insta_clone.settings import BASE_DIR
 from imgurpython import ImgurClient
 from datetime import timedelta, datetime
 from django.utils import timezone
-from paralleldots import response_paralleldots
 import requests
+
 
 
 def signup_view(request):
@@ -118,23 +118,23 @@ def post_view(request):
                 path = str(BASE_DIR + "\\" + post.image.url)
 
                 client = ImgurClient('b05a87fc2d9b16a', 'e40bae7fc06026074022bcac6b4f370fe4963cba')
-                post.image_url = client.upload_from_path(path,anon=True)['link']
+                post.image_url = client.upload_from_path(path, anon=True)['link']
                 post.save()
 
                 return redirect('/feed/')
 
         else:
             form = PostForm()
-        return render(request, 'post.html', {'form' : form})
+        return render(request, 'post.html', {'form': form})
     else:
         return redirect('/login/')
 
 
-def arr_of_dict(args):
+def send_response(comment_text):
     pass
 
 
-def send_response(comment_text):
+def arr_of_dict(args):
     pass
 
 
@@ -147,10 +147,22 @@ def comment_view(request):
             print post_id
             comment_text = form.cleaned_data.get('comment_text')
             comment = CommentModel.objects.create(user=user, post_id=post_id, comment_text=comment_text)
+            for k in range(0, len(arr_of_dict)):
+                keyword = arr_of_dict[k]['comment']
+                value = arr_of_dict[k]['value']
+                if keyword == 'positive' and value > 0.7:
+                    is_positive = True
+                    send_response(comment_text)
+
+                elif keyword == 'negative' and value < 0.7:
+                    is_negative = False
+                else:
+                    is_negative= False
+            comment_text.is_negative = is_negative
             comment.save()
 
             apikey = '39JDDYmgIv5c1FPr54X0ozcQ6L8nnk29DejqgZ2h7aY'
-            request_url =('https://apis.paralleldots.com/sentiment?sentence1=%s&apikey=%s') % (comment_text, apikey)
+            request_url = ('https://apis.paralleldots.com/sentiment?sentence1=%s&apikey=%s') % (comment_text, apikey)
             print 'POST request url : %s' % (request_url)
             sentiment = requests.get(request_url, verify=False).json()
             sentiment_value = sentiment['sentiment']
@@ -163,6 +175,7 @@ def comment_view(request):
     else:
         return redirect('/login')
 
+
 def check_validation(request):
     if request.COOKIES.get('session_token'):
         session = SessionToken.objects.filter(session_token=request.COOKIES.get('session_token')).first()
@@ -173,15 +186,15 @@ def check_validation(request):
     else:
         return None
 
+
 def logout_view(request):
+    user = check_validation(request)
 
-        user = check_validation(request)
-
-        if user is not None:
-            latest_sessn = SessionToken.objects.filter(user=user).last()
-            if latest_sessn:
-                latest_sessn.delete()
-                return redirect("/login/")
+    if user is not None:
+        latest_sessn = SessionToken.objects.filter(user=user).last()
+        if latest_sessn:
+            latest_sessn.delete()
+            return redirect("/login/")
 
 
 # method to create upvote for comments
@@ -208,14 +221,14 @@ def upvote_view(request):
                 print (comment.upvote_num)
             else:
                 print ('stupid mistake')
-                #liked_msg = 'Unliked!'
+                # liked_msg = 'Unliked!'
 
         return redirect('/feed/')
     else:
         return redirect('/feed/')
 
-def query_based_search_view(request):
 
+def query_based_search_view(request):
     user = check_validation(request)
     if user:
         if request.method == "POST":
@@ -225,7 +238,7 @@ def query_based_search_view(request):
                 username_query = searchForm.cleaned_data.get('searchquery')
                 user_with_query = UserModel.objects.filter(username=username_query).first();
                 posts = PostModel.objects.filter(user=user_with_query)
-                return render(request, 'feed.html',{'posts':posts})
+                return render(request, 'feed.html', {'posts': posts})
             else:
                 return redirect('/feed/')
     else:
