@@ -130,13 +130,6 @@ def post_view(request):
         return redirect('/login/')
 
 
-def send_response(comment_text):
-    pass
-
-
-def arr_of_dict(args):
-    pass
-
 
 def comment_view(request):
     user = check_validation(request)
@@ -147,18 +140,7 @@ def comment_view(request):
             print post_id
             comment_text = form.cleaned_data.get('comment_text')
             comment = CommentModel.objects.create(user=user, post_id=post_id, comment_text=comment_text)
-            for k in range(0, len(arr_of_dict)):
-                keyword = arr_of_dict[k]['comment']
-                value = arr_of_dict[k]['value']
-                if keyword == 'positive' and value > 0.7:
-                    is_positive = True
-                    send_response(comment_text)
 
-                elif keyword == 'negative' and value < 0.7:
-                    is_negative = False
-                else:
-                    is_negative= False
-            comment_text.is_negative = is_negative
             comment.save()
 
             apikey = '39JDDYmgIv5c1FPr54X0ozcQ6L8nnk29DejqgZ2h7aY'
