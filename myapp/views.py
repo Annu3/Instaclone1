@@ -140,7 +140,18 @@ def comment_view(request):
             print post_id
             comment_text = form.cleaned_data.get('comment_text')
             comment = CommentModel.objects.create(user=user, post_id=post_id, comment_text=comment_text)
+            for k in range(0, len(arr_of_dict)):
+                keyword = arr_of_dict[k]['name']
+                value = arr_of_dict[k]['value']
+                if keyword == 'positive' and value > 0.7:
+                    is_dirty = True
+                    send_response(comment_text)
 
+                elif keyword == 'negative' and value < 0.7:
+                    is_positive = False
+                else:
+                    is_positive = False
+            comment_text.is_positive = is_positive
             comment.save()
 
             apikey = '39JDDYmgIv5c1FPr54X0ozcQ6L8nnk29DejqgZ2h7aY'
@@ -150,12 +161,13 @@ def comment_view(request):
             sentiment_value = sentiment['sentiment']
             print sentiment_value
 
-            print 'commented'
-            return redirect('/feed/')
+
+             print 'commented'
+             return redirect('/feed/')
         else:
             return redirect('/feed/')
     else:
-        return redirect('/login')
+          return redirect('/login')
 
 
 def check_validation(request):
