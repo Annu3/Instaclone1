@@ -144,7 +144,7 @@ def comment_view(request):
                 keyword = arr_of_dict[k]['name']
                 value = arr_of_dict[k]['value']
                 if keyword == 'positive' and value > 0.7:
-                    is_dirty = True
+                    is_positive = True
                     send_response(comment_text)
 
                 elif keyword == 'negative' and value < 0.7:
