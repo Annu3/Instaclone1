@@ -1,13 +1,19 @@
 from __future__ import unicode_literals
+from tokenize import Comment
+from django.shortcuts import render
 from django.shortcuts import render, redirect
 from forms import SignUpForm, LoginForm, PostForm, LikeForm, CommentForm, UpvoteForm, SearchForm
 from models import UserModel, SessionToken, PostModel, LikeModel, CommentModel
 from django.contrib.auth.hashers import make_password, check_password
 from insta_clone.settings import BASE_DIR
 from imgurpython import ImgurClient
+from paralleldots.config import get_api_key
 from datetime import timedelta, datetime
 from django.utils import timezone
 import requests
+import json
+
+
 
 
 
@@ -130,44 +136,63 @@ def post_view(request):
         return redirect('/login/')
 
 
+def send_response(comment_text):
+    pass
 
-def comment_view(request):
-    user = check_validation(request)
-    if user and request.method == 'POST':
-        form = CommentForm(request.POST)
-        if form.is_valid():
-            post_id = form.cleaned_data.get('post').id
-            print post_id
-            comment_text = form.cleaned_data.get('comment_text')
-            comment = CommentModel.objects.create(user=user, post_id=post_id, comment_text=comment_text)
-            for k in range(0, len(arr_of_dict)):
-                keyword = arr_of_dict[k]['name']
-                value = arr_of_dict[k]['value']
-                if keyword == 'positive' and value > 0.7:
-                    is_positive = True
-                    send_response(comment_text)
 
-                elif keyword == 'negative' and value < 0.7:
-                    is_positive = False
+def insta_clone_comment_text(args):
+    pass
+
+def comment_view(request, comment_text=None):
+    #objective for review of positive or  negative  comment
+    #set api_key
+    api_key = "39JDDYmgIv5c1FPr54X0ozcQ6L8nnk29DejqgZ2h7aY"
+    req_json = None
+    # 1 is for positive comment and 0 is for negative comment
+    try:
+        req_json = requests.post.json()
+        if req_json is not None:
+             sentiment = req_json['sentiment']
+             print req_json
+             print req_json['confidence_score']
+             if req_json['sentence_type'] == "Positive Comment":
+                 #if comment is positive it is greater than 5 percent
+                if req_json['confidence_score'] > 5:
+                    #return positive comment
+                   return 1
                 else:
-                    is_positive = False
-            comment_text.is_positive = is_positive
+                    #return negative comment
+                    return 0
+             else:
+                    return 0
+    except:
+                    return 0
+#url for the parallel dots of sentiment
+    url = "http://apis.paralleldots.com/sentiment"
+    #check if user is valid
+    user = check_validation(request)
+    #check user exists and request post
+    if user and request.method == 'POST':
+       form = CommentForm(request.POST)
+      #check if form is valid
+       if  form.is_valid():
+           #retrieve post id
+            post_id = form.cleaned_data.get('post').id
+           #accept comment text from the form
+            comment_text = form.cleaned_data.get('comment_text')
+
+            r = requests.get(url, params={"apikey": api_key, "comment": comment_text})
+            print r
+            comment = CommentModel.objects.create(user=user, post_id=post_id, comment_text=comment_text)
+            #comment save
             comment.save()
-
-            apikey = '39JDDYmgIv5c1FPr54X0ozcQ6L8nnk29DejqgZ2h7aY'
-            request_url = ('https://apis.paralleldots.com/sentiment?sentence1=%s&apikey=%s') % (comment_text, apikey)
-            print 'POST request url : %s' % (request_url)
-            sentiment = requests.get(request_url, verify=False).json()
-            sentiment_value = sentiment['sentiment']
-            print sentiment_value
-
-
-             print 'commented'
-             return redirect('/feed/')
-        else:
+           #redirect to the feed page
+            return redirect('/feed/')
+       else:
             return redirect('/feed/')
     else:
-          return redirect('/login')
+        return redirect('/login/')
+
 
 
 def check_validation(request):
