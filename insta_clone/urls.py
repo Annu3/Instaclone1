@@ -14,15 +14,16 @@ Including another URLconf
     2. Add a URL to urlpatterns:  url(r'^blog/', include('blog.urls'))
 """
 
-
+#importing url
 from django.conf.urls import url
+
+# importing admin
 from django.contrib import admin
 
-
-
+# importing signup_view, login_view, feed_view, post_view, like_view, comment_view, upvote_view, query_based_search_view functions
 from myapp.views import signup_view, login_view, feed_view, post_view, like_view, comment_view, upvote_view, query_based_search_view
 
-
+# defining all urls
 urlpatterns = [
     url('searchfilter/', query_based_search_view),
     url('upvote/', upvote_view),
