@@ -40,7 +40,7 @@ import json
 # creating signup_view function
 def signup_view(request):
 
-# requesting POST method
+# requesting POST method to access the values user provided
     if request.method == "POST":
         form = SignUpForm(request.POST)
         if form.is_valid():
@@ -63,6 +63,8 @@ def signup_view(request):
 # return redirect('login/')
         else:
             form = SignUpForm()
+
+# url called to show a form for signup
     elif request.method == "GET":
         form = SignUpForm()
         today = datetime.now()
@@ -172,39 +174,7 @@ def post_view(request):
 
 
 # creating comment_view function
-def comment_view(request, comment_text=None):
-
-#objective for review of positive or  negative  comment
-#set api_key
-    api_key = "39JDDYmgIv5c1FPr54X0ozcQ6L8nnk29DejqgZ2h7aY"
-    req_json = None
-
-# 1 is for positive comment and 0 is for negative comment
-    try:
-        req_json = requests.post.json()
-        if req_json is not None:
-             sentiment = req_json['sentiment']
-             print req_json
-             print req_json['confidence_score']
-             if req_json['sentence_type'] == "Positive Comment":
-
-#if comment is positive it is greater than 5 percent
-                if req_json['confidence_score'] > 5:
-
-#return positive comment
-                   return 1
-                else:
-
-#return negative comment
-                    return 0
-             else:
-                    return 0
-    except:
-                    return 0
-#url for the parallel dots of sentiment
-    url = "http://apis.paralleldots.com/sentiment"
-
-# function to check if user is valid
+def comment_view(request):
     user = check_validation(request)
 
 #check user exists and request post
@@ -220,12 +190,22 @@ def comment_view(request, comment_text=None):
 #accept comment text from the form
             comment_text = form.cleaned_data.get('comment_text')
 
-            r = requests.get(url, params={"apikey": api_key, "comment": comment_text})
-            print r
             comment = CommentModel.objects.create(user=user, post_id=post_id, comment_text=comment_text)
 
 #comment save
             comment.save()
+            apikey = '39JDDYmgIv5c1FPr54X0ozcQ6L8nnk29DejqgZ2h7aY'
+            request_url = ('https://apis.paralleldots.com/sentiment?sentence1=%s&apikey=%s') % (comment_text, apikey)
+            print 'POST request url : %s' % (request_url)
+            sentiment = requests.get(request_url, verify=False).json()
+            sentiment_value = sentiment['sentiment']
+            print sentiment_value
+            if sentiment_value <0.5:
+                print "negative comment"
+            else:
+                print "positive comment"
+
+            print "commented"
 
 #redirect to the feed page
             return redirect('/feed/')
